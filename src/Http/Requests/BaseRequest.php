@@ -14,6 +14,7 @@ use Oneduo\NovaFileManager\Contracts\Services\FileManagerContract;
 use Oneduo\NovaFileManager\Contracts\Support\InteractsWithFilesystem;
 use Oneduo\NovaFileManager\FileManager;
 use Oneduo\NovaFileManager\NovaFileManager;
+use Outl1ne\NovaSimpleRepeatable\SimpleRepeatable;
 
 /**
  * @property-read ?string $disk
@@ -52,7 +53,7 @@ class BaseRequest extends NovaRequest
 
     public function resolveField(): ?InteractsWithFilesystem
     {
-        if (!empty($this->wrapper) && $field = FileManager::forWrapper($this->wrapper)) {
+        if ( !empty($this->wrapper) && $field = FileManager::forWrapper($this->wrapper)) {
             return $field;
         }
 
@@ -62,7 +63,16 @@ class BaseRequest extends NovaRequest
             ? $this->flexibleAvailableFields($resource)
             : $resource->availableFields($this);
 
-        return $fields
+        $simpleRepeatable = $fields->whereInstanceOf(SimpleRepeatable::class);
+        $simpleRepeatableField = null;
+        if ($simpleRepeatable->count() && str_contains($this->attribute, '---')) {
+            [$attribute, $field] = explode('---', $this->attribute);
+            $simpleRepeatableField = $simpleRepeatable->findFieldByAttribute($attribute)
+                ->fields
+                ->findFieldByAttribute($field);
+        }
+
+        return $simpleRepeatableField ?? $fields
             ->whereInstanceOf(FileManager::class)
             ->findFieldByAttribute($this->attribute, function () {
                 abort(404);
@@ -106,7 +116,7 @@ class BaseRequest extends NovaRequest
         abort_unless($layouts = invade($field)->layouts, 404);
 
         /** @var \Whitecube\NovaFlexibleContent\Layouts\Layout $layout */
-        $layout = $layouts->first(fn ($layout) => $layout->name() === $name);
+        $layout = $layouts->first(fn($layout) => $layout->name() === $name);
 
         abort_if($layout === null, 404);
 
@@ -116,7 +126,7 @@ class BaseRequest extends NovaRequest
     public function resolveTool(): ?InteractsWithFilesystem
     {
         return tap(once(function () {
-            return collect(Nova::registeredTools())->first(fn (Tool $tool) => $tool instanceof NovaFileManager);
+            return collect(Nova::registeredTools())->first(fn(Tool $tool) => $tool instanceof NovaFileManager);
         }), function (?NovaFileManager $tool) {
             abort_if(is_null($tool), 404);
         });

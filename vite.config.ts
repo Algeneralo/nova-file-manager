@@ -18,6 +18,10 @@ export default defineConfig({
           find: '__types__',
           replacement: resolve(__dirname, 'resources/js/@types'),
         },
+        {
+          find: 'laravel-nova',
+          replacement: resolve(__dirname, '../../vendor/laravel/nova/resources/js/mixins/packages'),
+        }
       ],
     }),
   ],

@@ -105,17 +105,6 @@ const name = computed(() => (missing.value ? props.file.path : props.file.name))
       {{ !isUploading ? name : file.name }}
     </p>
 
-    <p v-if="missing && !isUploading" class="text-sm text-red-500 font-semibold text-left break-all">
-      {{ __('NovaFileManager.fileMissing', { path: file.path }) }}
-    </p>
-
-    <div
-      class="gap-x-0.5 inline-flex flex-wrap items-center text-xs pointer-events-none block font-medium text-gray-500 text-left break-all"
-    >
-      <span v-if="file.size">{{ file.size }}</span>
-      <span v-if="fieldMode && !singleDisk && file.disk?.length > 0" class="ml-0.5">&centerdot; {{ file.disk }}</span>
-    </div>
-
     <span class="absolute top-1 right-1" v-if="selected">
       <CheckCircleIcon class="h-5 w-5 text-blue-500" aria-hidden="true" />
     </span>

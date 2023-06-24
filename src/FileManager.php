@@ -39,6 +39,9 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
 
     public ?string $wrapper = null;
 
+    public  $resourceName = null;
+    public  $resourceID = null;
+
     public function __construct($name, $attribute = null, Closure $storageCallback = null)
     {
         parent::__construct($name, $attribute);
@@ -115,7 +118,7 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
             return $result;
         }
 
-        if (!is_array($result)) {
+        if ( !is_array($result)) {
             return $model->{$attribute} = $result;
         }
 
@@ -154,7 +157,7 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
 
     protected function resolveAttribute($resource, $attribute = null): ?array
     {
-        if (!$value = parent::resolveAttribute($resource, $attribute)) {
+        if ( !$value = parent::resolveAttribute($resource, $attribute)) {
             return null;
         }
 
@@ -163,12 +166,12 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
         }
 
         if ($value instanceof stdClass) {
-            $value = (array)$value;
+            $value = (array) $value;
         }
 
         if (is_array($value)) {
             if ($this->multiple) {
-                $value = collect($value)->map(fn(array|object $asset) => new Asset(...(array)$asset));
+                $value = collect($value)->map(fn(array|object $asset) => new Asset(...(array) $asset));
             } else {
                 $value = collect([new Asset(...$value)]);
             }
@@ -198,7 +201,7 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
 
     public static function forWrapper(string $name): ?static
     {
-        if (!$callback = (static::$wrappers[$name] ?? null)) {
+        if ( !$callback = (static::$wrappers[$name] ?? null)) {
             return null;
         }
 
@@ -211,7 +214,7 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
             return $this;
         }
 
-        if (!$wrapper = static::forWrapper($this->wrapper)) {
+        if ( !$wrapper = static::forWrapper($this->wrapper)) {
             return $this;
         }
 
@@ -237,8 +240,21 @@ class FileManager extends Field implements InteractsWithFilesystemContract, Cove
                 'limit' => $this->multiple ? $this->limit : 1,
                 'asHtml' => $this->asHtml,
                 'wrapper' => $this->wrapper,
+                'resourceName' => $this->resourceName,
+                'resourceId' => $this->resourceID,
             ],
             $this->options(),
         );
+    }
+
+    public function setResourceName($resourceName)
+    {
+        $this->resourceName = $resourceName;
+        return $this;
+    }
+    public function setResourceId($resourceID)
+    {
+        $this->resourceId = $resourceID;
+        return $this;
     }
 }

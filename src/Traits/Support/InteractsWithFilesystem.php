@@ -84,21 +84,21 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showCreateFolder)
             ? call_user_func($this->showCreateFolder, $request)
-            : true;
+            : false;
     }
 
     public function showRenameFolder(Closure $callback): static
     {
         $this->showRenameFolder = $callback;
 
-        return $this;
+        return false;
     }
 
     public function shouldShowRenameFolder(NovaRequest $request): bool
     {
         return is_callable($this->showRenameFolder)
             ? call_user_func($this->showRenameFolder, $request)
-            : true;
+            : false;
     }
 
     public function showDeleteFolder(Closure $callback): static
@@ -112,7 +112,7 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showDeleteFolder)
             ? call_user_func($this->showDeleteFolder, $request)
-            : true;
+            : false;
     }
 
     public function showUploadFile(Closure $callback): static
@@ -140,7 +140,7 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showRenameFile)
             ? call_user_func($this->showRenameFile, $request)
-            : true;
+            : false;
     }
 
     public function showDeleteFile(Closure $callback): static
@@ -154,7 +154,7 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showDeleteFile)
             ? call_user_func($this->showDeleteFile, $request)
-            : true;
+            : false;
     }
 
     public function showUnzipFile(Closure $callback): static
@@ -168,7 +168,7 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showUnzipFile)
             ? call_user_func($this->showUnzipFile, $request)
-            : true;
+            : false;
     }
 
     public function showCropImage(Closure $callback): static
@@ -182,7 +182,7 @@ trait InteractsWithFilesystem
     {
         return is_callable($this->showCropImage)
             ? call_user_func($this->showCropImage, $request)
-            : true;
+            : false;
     }
 
     public function canCreateFolder(Closure $callback): static
