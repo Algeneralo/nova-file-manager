@@ -8,12 +8,13 @@ import draggable from 'vuedraggable'
 import Browser from '@/components/Browser.vue'
 import FieldCard from '@/components/Cards/FieldCard.vue'
 import useBrowserStore from '@/stores/browser'
+import {DependentFormField, FormField, HandlesValidationErrors} from 'laravel-nova'
 
 export default defineComponent({
   mixins: [
-    window.LaravelNova.FormField,
-    window.LaravelNova.DependentFormField,
-    window.LaravelNova.HandlesValidationErrors,
+    FormField,
+    DependentFormField,
+    HandlesValidationErrors,
   ],
 
   components: {
@@ -47,16 +48,18 @@ export default defineComponent({
     displayModal: false,
     value: [] as Entity[],
     flexibleGroup: [],
+    simpleGroup: [],
   }),
 
   mounted() {
     this.init()
 
     this.value = !(this.currentField.value === undefined || this.currentField.value === null)
-        ? this.currentField.value
-        : this.value
+      ? this.currentField.value
+      : this.value
 
     this.flexibleGroup = this.resolveFlexible(this)
+    this.simpleGroup = this.resolveSimpleGroup(this)
   },
 
   computed: {
@@ -77,27 +80,27 @@ export default defineComponent({
     fill(formData: FormData) {
       if (this.value?.length) {
         formData.append(
-            this.currentField.attribute,
-            JSON.stringify(
-                this.value?.map((file: Entity) => ({
-                  path: file.path,
-                  disk: file.disk,
-                })),
-            ),
+          this.currentField.attribute,
+          JSON.stringify(
+            this.value?.map((file: Entity) => ({
+              path: file.path,
+              disk: file.disk,
+            })),
+          ),
         )
       }
     },
 
     openBrowserModal() {
       this.displayModal = true
-
+console.log(this.currentField.resourceName,this.currentField.resourceId)
       this.openBrowser({
         initialFiles: this.value,
         multiple: this.currentField.multiple ?? false,
         limit: this.currentField.limit ?? null,
         wrapper: this.currentField.wrapper ?? null,
-        resource: this.resourceName ?? null,
-        resourceId: this.resourceId,
+        resource: this.resourceName ?? this.currentField.resourceName,
+        resourceId: this.resourceId ?? this.currentField.resourceId,
         attribute: this.flexibleGroup.length ? this.currentField.sortableUriKey : this.currentField.attribute,
         singleDisk: this.currentField.singleDisk ?? false,
         permissions: this.currentField.permissions,
@@ -134,6 +137,18 @@ export default defineComponent({
       }
 
       return elements
+    }, // @ts-ignore
+    resolveSimpleGroup(component) {
+      let elements = []
+
+      let group = component.$parent
+      let parent = component.$parent?.$parent?.$parent?.$parent
+      if (parent?.field?.component === 'simple-repeatable') {
+      //   elements.unshift(...this.resolveSimpleGroup(parent))
+      //   elements.push(`${group?.group?.name}:${parent.field.sortableUriKey}`)
+      }
+
+      return elements
     },
   },
 
@@ -154,17 +169,17 @@ export default defineComponent({
         <div :class="{ dark }">
           <div v-if="value?.length > 0" class="flex flex-row gap-2 flex-wrap w-full">
             <draggable
-                v-model="value"
-                class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2 w-full"
-                ghost-class="opacity-0"
-                item-key="id"
-                @end="drag = false"
-                @start="drag = true"
-                tag="ul"
-                v-bind="dragOptions"
+              v-model="value"
+              class="grid grid-cols-2 gap-2 mb-2 w-full"
+              ghost-class="opacity-0"
+              item-key="id"
+              @end="drag = false"
+              @start="drag = true"
+              tag="ul"
+              v-bind="dragOptions"
             >
               <template #item="{ element }">
-                <FieldCard :field="field" :file="element" class="cursor-grab" :on-deselect="deselectFile" />
+                <FieldCard :field="field" :file="element" class="cursor-grab" :on-deselect="deselectFile"/>
               </template>
             </draggable>
           </div>
@@ -175,7 +190,7 @@ export default defineComponent({
                 type="button"
                 @click="openBrowserModal"
             >
-              <CloudIcon aria-hidden="true" class="-ml-1 mr-2 h-5 w-5 text-gray-400 dark:text-gray-200" />
+              <CloudIcon aria-hidden="true" class="-ml-1 mr-2 h-5 w-5 text-gray-400 dark:text-gray-200"/>
               {{ __('NovaFileManager.openBrowser') }}
             </button>
           </div>
@@ -193,7 +208,7 @@ export default defineComponent({
               leave-from="opacity-100"
               leave-to="opacity-0"
           >
-            <div class="fixed inset-0 bg-gray-800/20 backdrop-blur-sm transition-opacity" />
+            <div class="fixed inset-0 bg-gray-800/20 backdrop-blur-sm transition-opacity"/>
           </TransitionChild>
 
           <div :class="['fixed z-[60] inset-0 overflow-y-auto w-full', { dark }]">
@@ -210,7 +225,7 @@ export default defineComponent({
                 <DialogPanel
                     class="relative bg-transparent md:rounded-lg overflow-hidden shadow-xl transition-all w-full border border-gray-300 dark:border-gray-800 md:m-8 m-0"
                 >
-                  <Browser />
+                  <Browser/>
                 </DialogPanel>
               </TransitionChild>
             </div>
